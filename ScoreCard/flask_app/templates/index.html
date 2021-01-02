@@ -1,0 +1,486 @@
+<header>
+    <style>
+        .progress {
+        width: 150px;
+        height: 150px;
+        background: none;
+        position: relative;
+        }
+
+        .progress::after {
+        content: "";
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 6px solid #eee;
+        position: absolute;
+        top: 0;
+        left: 0;
+        }
+
+        .progress>span {
+        width: 50%;
+        height: 100%;
+        overflow: hidden;
+        position: absolute;
+        top: 0;
+        z-index: 1;
+        }
+
+        .progress .progress-left {
+        left: 0;
+        }
+
+        .progress .progress-bar {
+        width: 100%;
+        height: 100%;
+        background: none;
+        border-width: 6px;
+        border-style: solid;
+        position: absolute;
+        top: 0;
+        }
+
+        .progress .progress-left .progress-bar {
+        left: 100%;
+        border-top-right-radius: 80px;
+        border-bottom-right-radius: 80px;
+        border-left: 0;
+        -webkit-transform-origin: center left;
+        transform-origin: center left;
+        }
+
+        .progress .progress-right {
+        right: 0;
+        }
+
+        .progress .progress-right .progress-bar {
+        left: -100%;
+        border-top-left-radius: 80px;
+        border-bottom-left-radius: 80px;
+        border-right: 0;
+        -webkit-transform-origin: center right;
+        transform-origin: center right;
+        }
+
+        .progress .progress-value {
+        position: absolute;
+        top: 0;
+        left: 0;
+        }
+
+        /*
+        *
+        * ==========================================
+        * FOR DEMO PURPOSE
+        * ==========================================
+        *
+        */
+
+    </style>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script
+        src="https://code.jquery.com/jquery-3.5.1.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+        crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        changeProgressBar = function(score){
+            var ctx = document.getElementById('circularLoader').getContext('2d');
+            var al = 0;
+            var start = 4.72;
+            var cw = ctx.canvas.width;
+            var ch = ctx.canvas.height; 
+            var diff;
+            function progressSim(){
+                diff = ((al / 1000) * Math.PI*2*10).toFixed(2);
+                ctx.clearRect(0, 0, cw, ch);
+                ctx.lineWidth = 17;
+                ctx.fillStyle = '#4285f4';
+                ctx.strokeStyle = "#4285f4";
+                ctx.textAlign = "center";
+                ctx.font="28px monospace";
+                ctx.fillText(al+' pts', cw*.52, ch*.5+5, cw+12);
+                ctx.beginPath();
+                ctx.arc(100, 100, 75, start, diff/10+start, false);
+                ctx.stroke();
+                if(al >= score){
+                    clearTimeout(sim);
+                    ctx.lineWidth = 17;
+                    ctx.clearRect(0, 0, cw, ch);
+                    ctx.fillStyle = '#4285f4';
+                    ctx.strokeStyle = "#4285f4";
+                    ctx.textAlign = "center";
+                    ctx.font="28px monospace";
+                    ctx.fillText(score+' pts', cw*.52, ch*.5+5, cw+12);
+                    ctx.beginPath();
+                    ctx.arc(100, 100, 75, start, diff/10+start, false);
+                    ctx.stroke();
+                    // Add scripting here that will run when progress completes
+                }
+                al+=5;
+            }
+            var sim = setInterval(progressSim, 1);
+        };
+        $( document ).ready(function() {
+            $("#submit_btton").click(function(){
+                $("#main-form").submit();
+            })
+            $("#main-form").submit(function(){
+                $.ajax({ // create an AJAX call...
+                    data: $(this).serialize(), // get the form data
+                    type: $(this).attr('method'), // GET or POST
+                    url: $(this).attr('action'), // the file to call
+                    success: function(response) { // on success..
+                        $("#scoreCardLabel").text(response.score);
+                        changeProgressBar(response.score);
+                        
+                    }
+                });
+                return false; // cancel original event to prevent form submitting
+            });
+
+            
+        });
+    </script>
+</header>
+
+<body>
+    <h2>Credit ScoreCard</h2>
+    <style>
+        .hide { position:absolute; top:-1px; left:-1px; width:1px; height:1px; }
+      </style>
+    <iframe name="hiddenFrame" class="hide"></iframe>
+    <form class="form-inline" action="/get_scorecard" target="hiddenFrame" id="main-form">
+
+       
+    <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="status.of.existing.checking.account">Status of existing checking account</label>
+    <div class="col">
+    <select class="form-control" id="status.of.existing.checking.account" name = "status.of.existing.checking.account">
+    <option value="... < 0 DM">... < 0 DM</option>
+    <option value="0 <= ... < 200 DM">0 <= ... < 200 DM</option>
+    <option value="no checking account">no checking account</option>
+    <option value="... >= 200 DM / salary assignments for at least 1 year">... >= 200 DM / salary assignments for at least 1 year</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="duration.in.month">Duration in month</label>
+    <div class="col">
+    <select class="form-control" id="duration.in.month" name = "duration.in.month">
+    <option value="(3.932, 10.8]">(3.932, 10.8]</option>
+    <option value="(44.8, 51.6]">(44.8, 51.6]</option>
+    <option value="(10.8, 17.6]">(10.8, 17.6]</option>
+    <option value="(38.0, 44.8]">(38.0, 44.8]</option>
+    <option value="(17.6, 24.4]">(17.6, 24.4]</option>
+    <option value="(31.2, 38.0]">(31.2, 38.0]</option>
+    <option value="(24.4, 31.2]">(24.4, 31.2]</option>
+    <option value="(58.4, 65.2]">(58.4, 65.2]</option>
+    <option value="(51.6, 58.4]">(51.6, 58.4]</option>
+    <option value="(65.2, 72.0]">(65.2, 72.0]</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="credit.history">Credit history</label>
+    <div class="col">
+    <select class="form-control" id="credit.history" name = "credit.history">
+    <option value="critical account/ other credits existing (not at this bank)">critical account/ other credits existing (not at this bank)</option>
+    <option value="existing credits paid back duly till now">existing credits paid back duly till now</option>
+    <option value="delay in paying off in the past">delay in paying off in the past</option>
+    <option value="no credits taken/ all credits paid back duly">no credits taken/ all credits paid back duly</option>
+    <option value="all credits at this bank paid back duly">all credits at this bank paid back duly</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="purpose">Purpose</label>
+    <div class="col">
+    <select class="form-control" id="purpose" name = "purpose">
+    <option value="radio/television">radio/television</option>
+    <option value="education">education</option>
+    <option value="furniture/equipment">furniture/equipment</option>
+    <option value="car (new)">car (new)</option>
+    <option value="car (used)">car (used)</option>
+    <option value="business">business</option>
+    <option value="domestic appliances">domestic appliances</option>
+    <option value="repairs">repairs</option>
+    <option value="others">others</option>
+    <option value="retraining">retraining</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="credit.amount">Credit amount</label>
+    <div class="col">
+    <select class="form-control" id="credit.amount" name = "credit.amount">
+    <option value="(976.96, 1340.44]">(976.96, 1340.44]</option>
+    <option value="(5702.2, 6065.68]">(5702.2, 6065.68]</option>
+    <option value="(2067.4, 2430.88]">(2067.4, 2430.88]</option>
+    <option value="(7519.6, 7883.08]">(7519.6, 7883.08]</option>
+    <option value="(4611.76, 4975.24]">(4611.76, 4975.24]</option>
+    <option value="(8973.52, 9337.0]">(8973.52, 9337.0]</option>
+    <option value="(2794.36, 3157.84]">(2794.36, 3157.84]</option>
+    <option value="(6792.64, 7156.12]">(6792.64, 7156.12]</option>
+    <option value="(4975.24, 5338.72]">(4975.24, 5338.72]</option>
+    <option value="(4248.28, 4611.76]">(4248.28, 4611.76]</option>
+    <option value="(1340.44, 1703.92]">(1340.44, 1703.92]</option>
+    <option value="(7883.08, 8246.56]">(7883.08, 8246.56]</option>
+    <option value="(12244.84, 12608.32]">(12244.84, 12608.32]</option>
+    <option value="(3157.84, 3521.32]">(3157.84, 3521.32]</option>
+    <option value="(2430.88, 2794.36]">(2430.88, 2794.36]</option>
+    <option value="(1703.92, 2067.4]">(1703.92, 2067.4]</option>
+    <option value="(231.826, 613.48]">(231.826, 613.48]</option>
+    <option value="(3884.8, 4248.28]">(3884.8, 4248.28]</option>
+    <option value="(6065.68, 6429.16]">(6065.68, 6429.16]</option>
+    <option value="(7156.12, 7519.6]">(7156.12, 7519.6]</option>
+    <option value="(613.48, 976.96]">(613.48, 976.96]</option>
+    <option value="(6429.16, 6792.64]">(6429.16, 6792.64]</option>
+    <option value="(9337.0, 9700.48]">(9337.0, 9700.48]</option>
+    <option value="(14062.24, 14425.72]">(14062.24, 14425.72]</option>
+    <option value="(3521.32, 3884.8]">(3521.32, 3884.8]</option>
+    <option value="(12608.32, 12971.8]">(12608.32, 12971.8]</option>
+    <option value="(15879.64, 16243.12]">(15879.64, 16243.12]</option>
+    <option value="(11881.36, 12244.84]">(11881.36, 12244.84]</option>
+    <option value="(8246.56, 8610.04]">(8246.56, 8610.04]</option>
+    <option value="(10063.96, 10427.44]">(10063.96, 10427.44]</option>
+    <option value="(8610.04, 8973.52]">(8610.04, 8973.52]</option>
+    <option value="(5338.72, 5702.2]">(5338.72, 5702.2]</option>
+    <option value="(10427.44, 10790.92]">(10427.44, 10790.92]</option>
+    <option value="(10790.92, 11154.4]">(10790.92, 11154.4]</option>
+    <option value="(14425.72, 14789.2]">(14425.72, 14789.2]</option>
+    <option value="(9700.48, 10063.96]">(9700.48, 10063.96]</option>
+    <option value="(11517.88, 11881.36]">(11517.88, 11881.36]</option>
+    <option value="(13698.76, 14062.24]">(13698.76, 14062.24]</option>
+    <option value="(12971.8, 13335.28]">(12971.8, 13335.28]</option>
+    <option value="(11154.4, 11517.88]">(11154.4, 11517.88]</option>
+    <option value="(15516.16, 15879.64]">(15516.16, 15879.64]</option>
+    <option value="(18060.52, 18424.0]">(18060.52, 18424.0]</option>
+    <option value="(14789.2, 15152.68]">(14789.2, 15152.68]</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="savings.account.and.bonds">Savings account and bonds</label>
+    <div class="col">
+    <select class="form-control" id="savings.account.and.bonds" name = "savings.account.and.bonds">
+    <option value="unknown/ no savings account">unknown/ no savings account</option>
+    <option value="... < 100 DM">... < 100 DM</option>
+    <option value="500 <= ... < 1000 DM">500 <= ... < 1000 DM</option>
+    <option value="... >= 1000 DM">... >= 1000 DM</option>
+    <option value="100 <= ... < 500 DM">100 <= ... < 500 DM</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="present.employment.since">Present employment since</label>
+    <div class="col">
+    <select class="form-control" id="present.employment.since" name = "present.employment.since">
+    <option value="... >= 7 years">... >= 7 years</option>
+    <option value="1 <= ... < 4 years">1 <= ... < 4 years</option>
+    <option value="4 <= ... < 7 years">4 <= ... < 7 years</option>
+    <option value="unemployed">unemployed</option>
+    <option value="... < 1 year">... < 1 year</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="installment.rate.in.percentage.of.disposable.income">Installment rate in percentage of disposable income</label>
+    <div class="col">
+    <select class="form-control" id="installment.rate.in.percentage.of.disposable.income" name = "installment.rate.in.percentage.of.disposable.income">
+    <option value="4">4</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="1">1</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="personal.status.and.sex">Personal status and sex</label>
+    <div class="col">
+    <select class="form-control" id="personal.status.and.sex" name = "personal.status.and.sex">
+    <option value="male : divorced/separated">male : divorced/separated</option>
+    <option value="female : divorced/separated/married">female : divorced/separated/married</option>
+    <option value="male : single">male : single</option>
+    <option value="male : married/widowed">male : married/widowed</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="other.debtors.or.guarantors">Other debtors or guarantors</label>
+    <div class="col">
+    <select class="form-control" id="other.debtors.or.guarantors" name = "other.debtors.or.guarantors">
+    <option value="none">none</option>
+    <option value="guarantor">guarantor</option>
+    <option value="co-applicant">co-applicant</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="present.residence.since">Present residence since</label>
+    <div class="col">
+    <select class="form-control" id="present.residence.since" name = "present.residence.since">
+    <option value="4">4</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="1">1</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="property">Property</label>
+    <div class="col">
+    <select class="form-control" id="property" name = "property">
+    <option value="real estate">real estate</option>
+    <option value="building society savings agreement/ life insurance">building society savings agreement/ life insurance</option>
+    <option value="unknown / no property">unknown / no property</option>
+    <option value="car or other, not in attribute Savings account/bonds">car or other, not in attribute Savings account/bonds</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="age.in.years">Age in years</label>
+    <div class="col">
+    <select class="form-control" id="age.in.years" name = "age.in.years">
+    <option value="(66.6, 69.4]">(66.6, 69.4]</option>
+    <option value="(21.8, 24.6]">(21.8, 24.6]</option>
+    <option value="(47.0, 49.8]">(47.0, 49.8]</option>
+    <option value="(44.2, 47.0]">(44.2, 47.0]</option>
+    <option value="(52.6, 55.4]">(52.6, 55.4]</option>
+    <option value="(33.0, 35.8]">(33.0, 35.8]</option>
+    <option value="(58.2, 61.0]">(58.2, 61.0]</option>
+    <option value="(27.4, 30.2]">(27.4, 30.2]</option>
+    <option value="(24.6, 27.4]">(24.6, 27.4]</option>
+    <option value="(30.2, 33.0]">(30.2, 33.0]</option>
+    <option value="(41.4, 44.2]">(41.4, 44.2]</option>
+    <option value="(35.8, 38.6]">(35.8, 38.6]</option>
+    <option value="(38.6, 41.4]">(38.6, 41.4]</option>
+    <option value="(61.0, 63.8]">(61.0, 63.8]</option>
+    <option value="(55.4, 58.2]">(55.4, 58.2]</option>
+    <option value="(49.8, 52.6]">(49.8, 52.6]</option>
+    <option value="(63.8, 66.6]">(63.8, 66.6]</option>
+    <option value="(18.944, 21.8]">(18.944, 21.8]</option>
+    <option value="(69.4, 72.2]">(69.4, 72.2]</option>
+    <option value="(72.2, 75.0]">(72.2, 75.0]</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="other.installment.plans">Other installment plans</label>
+    <div class="col">
+    <select class="form-control" id="other.installment.plans" name = "other.installment.plans">
+    <option value="none">none</option>
+    <option value="bank">bank</option>
+    <option value="stores">stores</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="housing">Housing</label>
+    <div class="col">
+    <select class="form-control" id="housing" name = "housing">
+    <option value="own">own</option>
+    <option value="for free">for free</option>
+    <option value="rent">rent</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="number.of.existing.credits.at.this.bank">Number of existing credits at this bank</label>
+    <div class="col">
+    <select class="form-control" id="number.of.existing.credits.at.this.bank" name = "number.of.existing.credits.at.this.bank">
+    <option value="2">2</option>
+    <option value="1">1</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="job">Job</label>
+    <div class="col">
+    <select class="form-control" id="job" name = "job">
+    <option value="skilled employee / official">skilled employee / official</option>
+    <option value="unskilled - resident">unskilled - resident</option>
+    <option value="management/ self-employed/ highly qualified employee/ officer">highly qualified employee/ officer</option>
+    <option value="unemployed/ unskilled - non-resident">unemployed/ unskilled - non-resident</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="number.of.people.being.liable.to.provide.maintenance.for">Number of people being liable to provide maintenance for</label>
+    <div class="col">
+    <select class="form-control" id="number.of.people.being.liable.to.provide.maintenance.for" name = "number.of.people.being.liable.to.provide.maintenance.for">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="telephone">Telephone</label>
+    <div class="col">
+    <select class="form-control" id="telephone" name = "telephone">
+    <option value="yes, registered under the customers name">yes, registered under the customers name</option>
+    <option value="none">none</option>
+    </select>
+    </div>
+    </div>
+    
+        <div class="form-group col-lg-6">
+        <label class="col-lg-6 form-control-label" for="foreign.worker">Foreign worker</label>
+    <div class="col">
+    <select class="form-control" id="foreign.worker" name = "foreign.worker">
+    <option value="yes">yes</option>
+    <option value="no">no</option>
+    </select>
+    </div>
+    </div>
+    <div class="form-group col-lg-6">
+        <div>
+            
+        </div>
+        <div class="col">
+            
+        </div>
+    </div>
+
+    <div class="form-group col-lg-6">
+        
+        <button type="button" class ="btn btn-lg btn-success" id="submit_btton">
+            Compute Score
+        </button>
+        <div class="col">
+            
+            <div id="loader">
+                <canvas id="circularLoader" width="200" height="200"></canvas>
+            </div>   
+        </div>
+    </div>
+    
+        
+    </form>
+<!--     
+    <div id = "scoreCardLabel" ></div> -->
+    
+</body>
